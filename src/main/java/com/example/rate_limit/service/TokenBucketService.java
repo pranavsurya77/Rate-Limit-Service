@@ -4,6 +4,10 @@ import java.util.List;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
+
+import com.example.rate_limit.dto.response.RateLimitResponse;
+import com.example.rate_limit.model.RateLimitDecision;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -22,19 +26,39 @@ public class TokenBucketService {
      * @param consume   Number of tokens to consume (usually 1)
      * @return true if request is allowed, false otherwise
      */
-    public boolean tryConsume(String clientKey, int consume) {
+    public RateLimitResponse checkRateLimit(String clientKey, String identifier) {
         List<Long> result = redisTemplate.execute(
                 tokenBucketScript,
-                List.of("rate_limit:bucket:" + clientKey, "clients:" + clientKey),
+                List.of("rate_limit:bucket:" + clientKey + ":" + identifier, "clients:" + clientKey),
                 System.currentTimeMillis(),
                 DEFAULT_MAX_TOKENS,
                 DEFAULT_REFILL_RATE,
-                consume);
-        if (result != null && !result.isEmpty()) {
-            long allowed = result.get(0);
-            return allowed == 1;
+                1 // Consume 1 token by default
+        );
+
+        RateLimitResponse response = new RateLimitResponse();
+        if (result != null && result.size() >= 5) {
+            boolean allowed = result.get(0) == 1;
+            response.setDecision(allowed ? RateLimitDecision.ALLOW : RateLimitDecision.DENY);
+            response.setRemaining(result.get(1).intValue());
+            response.setRetryAfterMs(result.get(2));
+            response.setResetAt(result.get(4));
+
+            // Set limit in request attributes to pass to interceptors/advice
+            int limit = result.get(3).intValue();
+            org.springframework.web.context.request.RequestAttributes attrs = 
+                org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+            if (attrs != null) {
+                attrs.setAttribute("rate-limit-limit", limit, org.springframework.web.context.request.RequestAttributes.SCOPE_REQUEST);
+            }
+        } else {
+            // Fallback in case script execution fails
+            response.setDecision(RateLimitDecision.DENY);
+            response.setRemaining(0);
+            response.setRetryAfterMs(0);
+            response.setResetAt(System.currentTimeMillis());
         }
-        return false;
+        return response;
     }
 
     /**

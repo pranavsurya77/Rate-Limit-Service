@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.example.rate_limit.model.Client;
 import com.example.rate_limit.service.ClientService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,7 +27,7 @@ public class ClientController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public Client configureClient(@RequestBody Client client) {
+    public Client configureClient(@Valid @RequestBody Client client) {
         var response = clientService.createClient(client);
         if (response != null) {
             return response;
@@ -37,7 +38,7 @@ public class ClientController {
     }
 
     @PutMapping("/update")
-    public Client updateClient(@RequestParam String clientId, @RequestBody Client client) {
+    public Client updateClient(@RequestParam String clientId, @Valid @RequestBody Client client) {
         Client existingClient = clientService.getClientByClientKey(clientId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Client not found with key: " + clientId));

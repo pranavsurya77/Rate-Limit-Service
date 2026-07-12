@@ -55,4 +55,8 @@ end
 local ttl = math.max(60, math.ceil((max_tokens / refill_rate) * 2))
 redis.call('EXPIRE', bucket_key, ttl)
 
-return { allowed, math.floor(remaining), retry_after_ms }
+-- Calculate reset time (when bucket refills fully)
+local reset_after_ms = math.ceil(((max_tokens - current_tokens) / refill_rate) * 1000)
+local reset_at_epoch_ms = now + reset_after_ms
+
+return { allowed, math.floor(remaining), retry_after_ms, max_tokens, reset_at_epoch_ms }

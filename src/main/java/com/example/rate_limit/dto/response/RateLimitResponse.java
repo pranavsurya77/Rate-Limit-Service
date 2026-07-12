@@ -10,4 +10,5 @@ public class RateLimitResponse {
     private RateLimitDecision decision;
     private int remaining;
     private long retryAfterMs;
+    private long resetAt;
 }

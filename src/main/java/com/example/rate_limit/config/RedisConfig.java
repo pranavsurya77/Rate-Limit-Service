@@ -35,6 +35,7 @@ public class RedisConfig {
     }
 
     @Bean
+    
     @SuppressWarnings("rawtypes")
     public RedisScript<List> tokenBucketScript() {
         DefaultRedisScript<List> script = new DefaultRedisScript<>();
