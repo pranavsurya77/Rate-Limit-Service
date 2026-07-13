@@ -1,5 +1,7 @@
 package com.example.rate_limit.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,11 +22,11 @@ public class RateLimitController {
     private final TokenBucketService tokenBucketService;
 
     @PostMapping("/check")
-    public RateLimitResponse isAllowed(@Valid @RequestBody RateLimitRequest request) {
+    public ResponseEntity<RateLimitResponse> isAllowed(@Valid @RequestBody RateLimitRequest request) {
         RateLimitResponse response = tokenBucketService.checkRateLimit(request.getClientKey(), request.getIdentifier());
         if (response.getDecision() == com.example.rate_limit.model.RateLimitDecision.DENY) {
-            throw new com.example.rate_limit.exception.RateLimitExceededException(response);
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
         }
-        return response;
+        return ResponseEntity.ok(response);
     }
 }

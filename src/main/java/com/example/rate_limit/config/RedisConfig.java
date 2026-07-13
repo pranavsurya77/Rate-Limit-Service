@@ -20,22 +20,19 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // Use String serializer for keys and hash keys
+        // Use String serializer for keys, values, hash keys, and hash values
         StringRedisSerializer stringSerializer = new StringRedisSerializer();
         template.setKeySerializer(stringSerializer);
+        template.setValueSerializer(stringSerializer);
         template.setHashKeySerializer(stringSerializer);
-
-        // Use Jackson serializer for values and hash values
-        GenericJacksonJsonRedisSerializer jacksonSerializer = GenericJacksonJsonRedisSerializer.builder().build();
-        template.setValueSerializer(jacksonSerializer);
-        template.setHashValueSerializer(jacksonSerializer);
+        template.setHashValueSerializer(stringSerializer);
 
         template.afterPropertiesSet();
         return template;
     }
 
     @Bean
-    
+
     @SuppressWarnings("rawtypes")
     public RedisScript<List> tokenBucketScript() {
         DefaultRedisScript<List> script = new DefaultRedisScript<>();

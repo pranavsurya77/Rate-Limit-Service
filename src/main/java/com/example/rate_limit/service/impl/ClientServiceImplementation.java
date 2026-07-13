@@ -3,8 +3,10 @@ package com.example.rate_limit.service.impl;
 import java.time.Instant;
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import com.example.rate_limit.event.ClientConfigChangedEvent;
 import com.example.rate_limit.model.Client;
 import com.example.rate_limit.repository.ClientRepository;
 import com.example.rate_limit.service.ClientService;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class ClientServiceImplementation implements ClientService {
 
     private final ClientRepository clientRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public Optional<Client> getClientByClientKey(String clientKey) {
@@ -32,20 +35,24 @@ public class ClientServiceImplementation implements ClientService {
             client.setId(client.getClientKey());
         }
 
-        return clientRepository.save(client);
+        Client savedClient = clientRepository.save(client);
+        eventPublisher.publishEvent(new ClientConfigChangedEvent(savedClient.getClientKey()));
+        return savedClient;
     }
 
     @Override
     public void updateClient(Client client) {
         client.setUpdatedAt(Instant.now());
         clientRepository.save(client);
+        eventPublisher.publishEvent(new ClientConfigChangedEvent(client.getClientKey()));
     }
 
     @Override
     public void deleteClient(String clientKey) {
         clientRepository.findByClientKey(clientKey)
-                .ifPresent(clientRepository::delete);
+                .ifPresent(client -> {
+                    clientRepository.delete(client);
+                    eventPublisher.publishEvent(new ClientConfigChangedEvent(clientKey));
+                });
     }
 }
-
-

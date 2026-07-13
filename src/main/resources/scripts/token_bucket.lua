@@ -10,11 +10,10 @@ local consume = tonumber(ARGV[4]) or 1.0
 local max_tokens = default_max_tokens
 local refill_rate = default_refill_rate
 
-if redis.call('EXISTS', config_key) == 1 then
-    local config_max = redis.call('HGET', config_key, 'maxTokens')
-    local config_rate = redis.call('HGET', config_key, 'refillRate')
-    if config_max then max_tokens = tonumber(config_max) end
-    if config_rate then refill_rate = tonumber(config_rate) end
+if config_key and config_key ~= "" then
+    local config = redis.call('HMGET', config_key, 'maxTokens', 'refillRate')
+    if config[1] then max_tokens = tonumber(config[1]) end
+    if config[2] then refill_rate = tonumber(config[2]) end
 end
 
 -- 2. Fetch current bucket state
