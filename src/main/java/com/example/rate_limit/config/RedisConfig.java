@@ -10,22 +10,17 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisConfig {
 
     @Bean
-    public RedisConnectionFactory redisConnectionFactory() {
-        String redisUrl = System.getenv("REDIS_URL");
-        if (redisUrl == null || redisUrl.isEmpty()) {
-            redisUrl = "redis://localhost:6379";
-        }
-
+    public RedisConnectionFactory redisConnectionFactory(@Value("${spring.data.redis.url}") String redisUrl) {
         URI uri = URI.create(redisUrl);
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
         config.setHostName(uri.getHost());
@@ -61,11 +56,19 @@ public class RedisConfig {
     }
 
     @Bean
-
     @SuppressWarnings("rawtypes")
     public RedisScript<List> tokenBucketScript() {
         DefaultRedisScript<List> script = new DefaultRedisScript<>();
         script.setLocation(new ClassPathResource("scripts/token_bucket.lua"));
+        script.setResultType(List.class);
+        return script;
+    }
+
+    @Bean
+    @SuppressWarnings("rawtypes")
+    public RedisScript<List> slidingWindowScript() {
+        DefaultRedisScript<List> script = new DefaultRedisScript<>();
+        script.setLocation(new ClassPathResource("scripts/sliding_window.lua"));
         script.setResultType(List.class);
         return script;
     }

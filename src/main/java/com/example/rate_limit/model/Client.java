@@ -29,6 +29,7 @@ public class Client {
 
     private int maxTokens;
     private int refillRate;
+    private int window;
 
     private RateLimitAlgorithm algorithm;
 
