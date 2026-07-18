@@ -17,6 +17,13 @@ graph TD
     Service -->|Response| Client
 ```
 
+### End-to-End Sequence Diagram
+
+The following sequence diagram illustrates how an application (e.g., Payment API) registers configuration with the Rate Limiter Service, checks limits per user request, and handles both `200 ALLOW` and `429 DENY` decisions:
+
+![Payment API Rate Limiting Sequence Diagram](./assets/payment_api_sequence_diagram.png)
+
+
 ## Core Components
 
 ### 1. RateLimitController

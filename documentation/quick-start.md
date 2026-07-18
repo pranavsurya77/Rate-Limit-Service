@@ -25,6 +25,13 @@ This guide will help you run the Rate Limiting Service locally and integrate it 
 
 To protect your application's endpoints, you must first register your application as a "Client" in the Rate Limiting Service, and then intercept incoming requests to check the rate limit.
 
+### Sequence Overview
+
+The sequence below depicts how a client application (e.g., Payment API) registers its parameters and evaluates end-user traffic:
+
+![Payment API Rate Limiting Sequence Diagram](./assets/payment_api_sequence_diagram.png)
+
+
 ### Step A: Register your Application
 Use the Admin API to register your application configuration.
 
