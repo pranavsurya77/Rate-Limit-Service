@@ -3,23 +3,28 @@
 This guide will help you run the Rate Limiting Service locally and integrate it into your client applications.
 
 ## Prerequisites
-- **Java 21**
-- **Maven**
-- **Redis** running locally on port `6379`, or a remote Redis instance.
+
+* **Java 21**
+* **Maven**
+* **Redis** running locally on port `6379`, or a remote Redis instance.
 
 ## 1. Local Setup
+
 1. Clone the repository.
 2. Ensure Redis is running (`redis-server`).
-3. (Optional) Create a `.env` file in the root directory to override the default Redis connection string:
-   ```env
-   REDIS_URL=redis://localhost:6379
-   PORT=8080
-   ```
-4. Run the application:
-   ```bash
-   ./mvnw spring-boot:run
-   ```
-   The service will start on `http://localhost:8080`.
+3.  (Optional) Create a `.env` file in the root directory to override the default Redis connection string:
+
+    ```env
+    REDIS_URL=redis://localhost:6379
+    PORT=8080
+    ```
+4.  Run the application:
+
+    ```bash
+    ./mvnw spring-boot:run
+    ```
+
+    The service will start on `http://localhost:8080`.
 
 ## 2. Integration Guide
 
@@ -29,10 +34,10 @@ To protect your application's endpoints, you must first register your applicatio
 
 The sequence below depicts how a client application (e.g., Payment API) registers its parameters and evaluates end-user traffic:
 
-![Payment API Rate Limiting Sequence Diagram](./assets/payment_api_sequence_diagram.png)
-
+![Payment API Rate Limiting Sequence Diagram](../.gitbook/assets/payment_api_sequence_diagram.png)
 
 ### Step A: Register your Application
+
 Use the Admin API to register your application configuration.
 
 ```bash
@@ -47,9 +52,11 @@ curl -X POST http://localhost:8080/api/v1/admin/client/register \
 ```
 
 ### Step B: Intercept and Check Limits
+
 In your application (e.g., in an API Gateway, Middleware, or Interceptor), extract the identifier (such as the user's IP Address or API Key) and call the Rate Limiting Service before processing the business logic.
 
 **Example Pseudo-code:**
+
 ```javascript
 async function rateLimitMiddleware(req, res, next) {
     const userIp = req.ip;
