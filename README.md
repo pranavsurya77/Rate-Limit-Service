@@ -26,6 +26,8 @@ The Rate Limiting Service acts as a centralized, API-driven guardrail for your m
 
 ## Explore the Documentation
 
+> 📖 **Full documentation is also available on [GitBook](https://mptube.gitbook.io/mptube-docs).**
+
 Navigate through the key sections to get started:
 
 * 🚀 [**Quick Start & Integration**](documentation/quick-start.md) — Step-by-step installation, running locally, and middleware integration examples.
